@@ -1,5 +1,8 @@
 package net.activitywatch.android.sync
 
+import net.activitywatch.android.privacy.PrivacyConfig
+import net.activitywatch.android.privacy.PrivacyMatch
+import net.activitywatch.android.privacy.PrivacyRule
 import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.After
@@ -28,11 +31,12 @@ class WebhookSyncEngineTest {
             return JSONArray().also { if (timestamp >= start && timestamp < end) it.put(event) }
         }
     }
-    private fun engine(at: Long = time) = WebhookSyncEngine(directory, "phone-1", source, send = {
-        sent.add(JSONObject(it.toString()))
-        if (failDelivery) throw IOException("simulated lost response")
-        WebhookAck(if (wrongReceipt) "other-batch" else it.getString("batch_id"), it.getJSONArray("events").length())
-    }, now = { at })
+    private fun engine(at: Long = time, privacy: PrivacyConfig = PrivacyConfig()) =
+        WebhookSyncEngine(directory, "phone-1", source, send = {
+            sent.add(JSONObject(it.toString()))
+            if (failDelivery) throw IOException("simulated lost response")
+            WebhookAck(if (wrongReceipt) "other-batch" else it.getString("batch_id"), it.getJSONArray("events").length())
+        }, now = { at }, transform = privacy::applyToEvent)
 
     @After fun cleanup() { directory.deleteRecursively() }
 
@@ -56,6 +60,17 @@ class WebhookSyncEngineTest {
         assertEquals(2, sent.size)
         assertEquals(1, sent.last().getJSONArray("events").getJSONObject(0).getInt("id"))
         assertNotEquals(sent[0].getString("batch_id"), sent[1].getString("batch_id"))
+    }
+
+    @Test fun `privacy rules apply before upload and a rule change resends the masked version`() {
+        assertEquals(1, engine().sync())
+        assertEquals("example.com", sent.last().getJSONArray("events").getJSONObject(0).getJSONObject("data").getString("url"))
+        val rules = PrivacyConfig(listOf(PrivacyRule(PrivacyMatch.DOMAIN, "example.com", "娱乐")))
+        assertEquals(1, engine(privacy = rules).sync())
+        val masked = sent.last().getJSONArray("events").getJSONObject(0)
+        assertEquals(1, masked.getInt("id"))
+        assertEquals("娱乐", masked.getJSONObject("data").getString("url"))
+        assertEquals(0, engine(privacy = rules).sync())
     }
 
     @Test fun `an unrelated HTTP success cannot advance the outbox`() {

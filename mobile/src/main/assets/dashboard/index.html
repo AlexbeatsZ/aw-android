@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="dark">
+  <title>Activity</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main id="view" class="view" aria-live="polite"></main>
+
+  <nav class="tabs" role="tablist" aria-label="页面">
+    <button role="tab" data-tab="timeline"><span class="tab-index">01</span><span>时间线</span></button>
+    <button role="tab" data-tab="stats"><span class="tab-index">02</span><span>统计</span></button>
+    <button role="tab" data-tab="privacy"><span class="tab-index">03</span><span>隐私</span></button>
+    <button role="tab" data-tab="settings"><span class="tab-index">04</span><span>设置</span></button>
+  </nav>
+
+  <div id="tooltip" class="tooltip" role="status" hidden></div>
+  <div id="toast" class="toast" role="status" hidden></div>
+
+  <script src="bridge.js"></script>
+  <script src="model.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

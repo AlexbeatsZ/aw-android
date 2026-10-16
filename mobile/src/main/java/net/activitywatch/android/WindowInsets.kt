@@ -48,9 +48,14 @@ internal fun AppCompatActivity.applySystemBarAppearance(darkContent: Boolean) {
  *   light; pass true for native screens whose layouts use DayNight theme attributes
  *   (e.g. SyncSettingsActivity). Default false keeps the existing behaviour for
  *   activities that host the web UI (MainActivity overrides later).
+ * @param alwaysDark paints dark chrome regardless of the system setting, for the
+ *   dark-only dashboard and the screens opened from it.
  */
-internal fun AppCompatActivity.applySafeWindowInsets(followNightMode: Boolean = false) {
-    applySystemBarAppearance(darkContent = followNightMode && isSystemNightMode())
+internal fun AppCompatActivity.applySafeWindowInsets(
+    followNightMode: Boolean = false,
+    alwaysDark: Boolean = false,
+) {
+    applySystemBarAppearance(darkContent = alwaysDark || (followNightMode && isSystemNightMode()))
     val root = findViewById<ViewGroup>(android.R.id.content).getChildAt(0)
     val left = root.paddingLeft
     val top = root.paddingTop

@@ -24,8 +24,6 @@ import androidx.core.net.toUri
 
 // enum for the onboarding pages
 enum class OnboardingPage {
-    WELCOME,
-    //FEATURES,
     ACCESSIBILITY_PERMISSION
 }
 
@@ -47,7 +45,7 @@ class OnboardingActivity : AppCompatActivity() {
 
         // helper function to update texts/visibility of buttons on page change
         fun updateButtons() {
-            nextButton.text = if (viewPager.currentItem == numPages - 1) "Finish" else "Continue"
+            nextButton.text = if (viewPager.currentItem == numPages - 1) "完成" else "继续"
             backButton.visibility = if (viewPager.currentItem > 0) View.VISIBLE else View.GONE
         }
 
@@ -74,7 +72,7 @@ class OnboardingActivity : AppCompatActivity() {
                     finish()
                 } else {
                     // Show a snackbar and don't finish the activity
-                    val snackbar = Snackbar.make(viewPager, "Please grant usage access permission, they are necessary for the core function of the app.", Snackbar.LENGTH_LONG)
+                    val snackbar = Snackbar.make(viewPager, "请先授予“使用情况访问”权限，这是记录手机使用的必要权限。", Snackbar.LENGTH_LONG)
                     snackbar.show()
                 }
             }
@@ -114,26 +112,12 @@ class OnboardingAdapter(fragmentActivity: FragmentActivity) : FragmentStateAdapt
 
     override fun createFragment(position: Int): Fragment {
         return when (position) {
-            OnboardingPage.WELCOME.ordinal -> WelcomeFragment()
-            //OnboardingPage.FEATURES.ordinal -> FeaturesFragment()
             OnboardingPage.ACCESSIBILITY_PERMISSION.ordinal -> PermissionsFragment()
             else -> throw IllegalArgumentException("Invalid position")
         }
     }
 }
 
-
-class WelcomeFragment : Fragment() {
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.fragment_welcome, container, false)
-    }
-}
-
-class FeaturesFragment : Fragment() {
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.fragment_features, container, false)
-    }
-}
 
 
 class PermissionsFragment : Fragment() {

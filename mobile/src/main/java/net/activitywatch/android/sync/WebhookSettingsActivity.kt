@@ -27,7 +27,7 @@ class WebhookSettingsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_webhook_settings)
-        applySafeWindowInsets(followNightMode = true)
+        applySafeWindowInsets(alwaysDark = true)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.title = getString(R.string.webhook_sync)
         prefs = WebhookPreferences(this)

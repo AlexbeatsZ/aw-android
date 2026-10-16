@@ -34,7 +34,7 @@
             android:name=".MainActivity"
             android:label="@string/app_name"
             android:configChanges="orientation|screenSize"
-            android:theme="@style/AppTheme.NoActionBar"
+            android:theme="@style/AppTheme.Dark"
             android:exported="true">
 
             <intent-filter>
@@ -51,21 +51,8 @@
             android:theme="@style/AppTheme.LightOnly"
             android:exported="true" />
 
-        <activity
-            android:name=".AuthSettingsActivity"
-            android:screenOrientation="portrait"
-            android:configChanges="orientation"
-            android:theme="@style/AppTheme.LightOnly"
-            android:exported="false"/>
-
-        <activity
-            android:name=".SyncSettingsActivity"
-            android:screenOrientation="portrait"
-            android:configChanges="orientation"
-            android:theme="@style/AppTheme.LightOnly"
-            android:exported="false"/>
         <activity android:name=".sync.WebhookSettingsActivity"
-            android:theme="@style/AppTheme.LightOnly" android:exported="false" />
+            android:theme="@style/AppTheme.Dark" android:exported="false" />
 
         <receiver
             android:name=".watcher.AlarmReceiver"
@@ -114,29 +101,5 @@
                 <action android:name="android.service.notification.NotificationListenerService" />
             </intent-filter>
         </service>
-
-        <!-- Category Time Widget -->
-        <receiver
-            android:name=".widget.CategoryTimeWidgetProvider"
-            android:exported="true"
-            android:label="@string/app_name">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-                <action android:name="net.activitywatch.android.widget.ACTION_REFRESH" />
-            </intent-filter>
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/category_time_widget_info" />
-        </receiver>
-
-        <provider
-            android:name="androidx.core.content.FileProvider"
-            android:authorities="${applicationId}.provider"
-            android:exported="false"
-            android:grantUriPermissions="true">
-            <meta-data
-                android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/file_paths" />
-        </provider>
     </application>
 </manifest>

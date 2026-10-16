@@ -1,115 +1,30 @@
-aw-android
-==========
+# aw-android（个人版）
 
-[![GitHub Actions badge](https://github.com/ActivityWatch/aw-android/workflows/Build/badge.svg)](https://github.com/ActivityWatch/aw-android/actions)
-[![Play Store ratings](https://PlayBadges.pavi2410.me/badge/ratings?id=net.activitywatch.android&country=us)](https://play.google.com/store/apps/details?id=net.activitywatch.android)
+只用来记录手机使用：应用使用时长、解锁次数和 Via 等浏览器的网页访问。数据保存在本机，并通过 Webhook 发送到自己的电脑（ROG）做后续分析。
 
-The official ActivityWatch app for Android: tracks app usage on your device and shows it in the same web UI as the desktop version.
+基于 [ActivityWatch for Android](https://github.com/ActivityWatch/aw-android)（MPL-2.0）修改。
 
-Available on Google Play and F-Droid:
+## 和上游的区别
 
-<a title="Get it on Google Play" href="https://play.google.com/store/apps/details?id=net.activitywatch.android">
-    <img src="https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png" height="80px"/>
-</a>
-<a title="Get it on F-Droid" href="https://f-droid.org/en/packages/net.activitywatch.android/">
-    <img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png" height="80px"/>
-</a>
+- **新的界面**：内置在 APK 里的深色仪表盘（`mobile/src/main/assets/dashboard`），只有四页：
+  - 时间线：按小时分组的垂直时间线，浏览器会话下列出访问过的网页；
+  - 统计：应用/网站占比环形图，加 24 小时分布；
+  - 隐私：把指定应用、网站或关键词显示为统一的名称（例如“娱乐”）；
+  - 设置：Webhook 状态、采集权限。
+- **隐私规则同时作用于界面和 Webhook 导出**（`privacy/PrivacyRules.kt`）。命中的记录只保留时间和时长，应用名、包名、网址、标题都替换成设定的名称。还可以让所有网址只保留域名。
+- **去掉的部分**：上游 Web UI（含秒表、分类、捐赠和仓库链接）、导航抽屉、桌面小部件、分类时长提醒、aw-sync 目录同步和 API 认证设置页、欢迎页。
 
-For other platforms, see [activitywatch.net/downloads](https://activitywatch.net/downloads/).
+## 构建
 
+不需要 Rust 工具链：Kotlin 部分搭配上游 v0.14.3 发布包里的原生库编译，见 [docs/build-via-webhook.md](docs/build-via-webhook.md)。
 
-## Usage
+推送到 `claude/**`、`feat/**` 或 `personal/**` 分支时，GitHub Actions 的 **Personal build** 工作流会跑测试并产出 arm64 debug APK（在运行详情页的 Artifacts 下载）。想直接覆盖安装已有的 app，需要用同一把 debug 签名：把 `base64 -w0 ~/.android/debug.keystore` 的结果存为仓库 Secret `DEBUG_KEYSTORE_BASE64`。
 
-Install the app from the [Play Store](https://play.google.com/store/apps/details?id=net.activitywatch.android), [F-Droid](https://f-droid.org/en/packages/net.activitywatch.android/), or the [GitHub releases](https://github.com/ActivityWatch/aw-android/releases).
-
-### For Oculus Quest
-
-> **Note** 
-> At some point a Quest system upgrade broke the ability to allow ActivityWatch access to usage stats. This can be fixed by manually assigning the needed permission using adb: `adb shell appops set net.activitywatch.android android:get_usage_stats allow`
-
-It's available [on SideQuest](https://sidequestvr.com/#/app/201). 
-
-
-## Building
-
-To build this app you first need to build aw-server-rust (`./aw-server-rust`) and aw-webui (`./aw-server-rust/aw-webui`).
-
-If you haven't already, initialize the submodules with: `git submodule update --init --recursive`
-
-### Building aw-server-rust
-
-> **Note**
-> If you don't want to go through the hassle of getting Rust up and running, you can download the jniLibs from [aw-server-rust CI artifacts](https://github.com/ActivityWatch/aw-server-rust/actions/workflows/build.yml) and place them in `mobile/src/main/jniLibs` manually instead of following this section.
-
-To build aw-server-rust you need to have Rust nightly installed (with rustup). Then you can build it with:
+测试：
 
 ```sh
-export ANDROID_NDK_HOME=`pwd`/aw-server-rust/NDK  # The path to your NDK
-pushd aw-server-rust && ./install-ndk.sh; popd    # This configures the NDK for use with Rust, and installs the NDK if missing
-env RELEASE=false make aw-server-rust             # Set RELEASE=true to build in release mode (slower build, harder to debug)
+./gradlew :mobile:testStandardDebugUnitTest
+node --test mobile/src/test/js/model.test.js integrations/rog-webhook/activitywatch.test.mjs integrations/rog-webhook/receiver.test.mjs
 ```
 
-> **Note**
-> The Android NDK will be downloaded by `install-ndk.sh` to `aw-server-rust/NDK` if `ANDROID_NDK_HOME` not set. You can create a symlink pointing to the real location if you already have it elsewhere (such as /opt/android-ndk/ on Arch Linux).
-
-### Building aw-webui
-
-To build aw-webui you need a recent version of node/npm installed. You can then build it with `make aw-webui`.
-
-### Putting it all together
-
-Once both aw-server-rust and aw-webui is built, you can build the Android app as any other Android app using Android Studio.
-
-### Making a release
-
-Use the **Release** workflow to bump the version, commit it, and create the
-tag in one atomic step. This ensures the committed `versionName` matches the
-tag (required for F-Droid, which builds from tagged source).
-
-1. Go to **Actions → Release → Run workflow**
-2. Enter the version number (e.g. `0.12.2`, without the `v` prefix)
-3. Click **Run workflow**
-
-The workflow will:
-- Update `versionName` in `mobile/build.gradle`
-- Commit the change to master
-- Create and push tag `v{version}`
-- Trigger the Build workflow (requires a `RELEASE_PAT` secret — a GitHub PAT with `repo` scope)
-
-This will trigger a GitHub Actions workflow which will build the app and upload it to GitHub releases, and deploy it to the Play Store (including the metadata in `./fastlane/metadata/android`).
-
-> **Note for maintainers:** Add a `RELEASE_PAT` secret (repo-scoped GitHub PAT) so
-> the tag push from the Release workflow triggers the Build workflow. Without it,
-> the Build workflow must be triggered manually after the tag is pushed.
-
-### Research builds
-
-A tag with a `-research` suffix (e.g. `v0.14.2b1-research`) is a study build:
-it builds and publishes to **GitHub releases only** and is never pushed to the
-Play Store. `scripts/assert-play-track.sh` resolves any `-research` tag to the
-`none` track and the `release-fastlane` job skips it (fail-closed, so a
-case-variant like `-Research` is also refused).
-
-- **versionName**: the `-research` suffix is a distribution-channel marker, not
-  a version component, so the Build workflow's versionName assertion strips it
-  from both the tag and the committed `versionName` before comparing
-  (`scripts/strip-research-suffix.sh`). A research tag `v0.14.2b1-research` is
-  verified against the committed `0.14.2b1` — and a Release-workflow run with a
-  `-research` input (which commits the suffixed `versionName`) also passes.
-  The reverse is refused: a **plain** tag whose committed `versionName` carries
-  `-research` fails the assertion, so a research-marked build can never reach
-  Play production from a plain tag. Self-test:
-  `scripts/strip-research-suffix.sh --self-test`.
-- **F-Droid**: aw-android is [on F-Droid](https://f-droid.org/en/packages/net.activitywatch.android/),
-  which builds from tagged source. Its `fdroiddata` update check
-  (`UpdateCheckMode: Tags ^v[\d.]+$`) only matches plain release tags, so
-  `-research` (and beta/dev) tags are ignored; keep it that way.
-- **Signing**: a study needs one stable signing key for its duration so
-  participants can install updates over the top of a sideloaded APK. Note that
-  a future Play release may be re-signed by Play App Signing, which would break
-  in-place upgrades for sideloaded installs — acceptable for a pilot that ends,
-  but it should be planned for before any long-lived sideloaded distribution.
-
-## More info
-
-For more info, check out the main [ActivityWatch repo](https://github.com/ActivityWatch/activitywatch).
+在电脑浏览器里调界面时，可以给 `assets/dashboard/index.html` 注入一个假的 `window.AWNative`（接口见 `dashboard/DashboardBridge.kt`）。

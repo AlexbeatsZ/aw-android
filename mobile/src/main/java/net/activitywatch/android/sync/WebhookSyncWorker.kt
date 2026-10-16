@@ -9,6 +9,7 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import net.activitywatch.android.BuildConfig
 import net.activitywatch.android.ConfigManager
+import net.activitywatch.android.privacy.PrivacyStore
 import net.activitywatch.android.watcher.UsageStatsWatcher
 import org.json.JSONArray
 import org.json.JSONObject
@@ -18,6 +19,8 @@ import java.net.HttpURLConnection
 import java.net.URL
 import java.net.URLEncoder
 import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import java.util.UUID
 import java.util.concurrent.TimeUnit
 
@@ -33,12 +36,14 @@ internal class WebhookPreferences(context: Context) {
         get() = prefs.getString("token", "") ?: ""
         set(value) { prefs.edit().putString("token", value).apply() }
     var status: String
-        get() = prefs.getString("status", "No webhook sync yet") ?: ""
+        get() = prefs.getString("status", "尚未同步") ?: ""
         set(value) { prefs.edit().putString("status", value).apply() }
     fun deviceId(): String = prefs.getString("device_id", null) ?: UUID.randomUUID().toString().also {
         check(prefs.edit().putString("device_id", it).commit()) { "Cannot save device identity" }
     }
 }
+
+private val STATUS_TIME = DateTimeFormatter.ofPattern("MM-dd HH:mm").withZone(ZoneId.systemDefault())
 
 internal class HttpFailure(val status: Int) : IOException("Webhook returned HTTP $status")
 
@@ -97,6 +102,7 @@ class WebhookSyncWorker(context: Context, params: WorkerParameters) : CoroutineW
                         return JSONArray(httpJson(URL(url), localToken))
                     }
                 }
+                val privacy = PrivacyStore(applicationContext).load()
                 val targetKey = fingerprint(targetUrl + "\n" + token)
                 val count = WebhookSyncEngine(
                     File(applicationContext.filesDir, "webhook/$targetKey"), prefs.deviceId(), source,
@@ -108,13 +114,14 @@ class WebhookSyncWorker(context: Context, params: WorkerParameters) : CoroutineW
                         val current = WebhookPreferences(applicationContext)
                         isStopped || !current.enabled || current.url != targetUrl || current.token != token
                     },
+                    transform = privacy::applyToEvent,
                 ).sync()
-                prefs.status = "${Instant.now()}: receiver confirmed $count events"
+                prefs.status = "${STATUS_TIME.format(Instant.now())} 接收端已确认 $count 条记录"
                 Result.success()
             } catch (e: CancellationException) {
                 throw e
             } catch (e: HttpFailure) {
-                prefs.status = "HTTP ${e.status}; pending data retained"
+                prefs.status = "HTTP ${e.status}，未送达的数据已保留"
                 if (e.status == 408 || e.status == 429 || e.status >= 500) Result.retry() else Result.failure()
             } catch (e: IllegalArgumentException) {
                 prefs.status = e.message ?: "Invalid webhook settings"
@@ -122,7 +129,7 @@ class WebhookSyncWorker(context: Context, params: WorkerParameters) : CoroutineW
             } catch (e: Exception) {
                 // Exceptions may contain a private destination URL or credentials. Keep
                 // status/logging independent of exception text.
-                prefs.status = "Sync unavailable (${e.javaClass.simpleName}); pending data retained for retry"
+                prefs.status = "暂时无法同步（${e.javaClass.simpleName}），数据已保留，稍后自动重试"
                 Result.retry()
             }
         }

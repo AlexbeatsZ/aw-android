@@ -55,6 +55,9 @@ internal class WebhookSyncEngine(
     private val send: (JSONObject) -> WebhookAck,
     private val now: () -> Long = System::currentTimeMillis,
     private val cancelled: () -> Boolean = { false },
+    // Applied before fingerprinting, so changing the privacy rules re-sends the recent
+    // replay window in its new form and the receiver keeps the latest version.
+    private val transform: (JSONObject) -> JSONObject = { it },
 ) {
     private val stateFile = File(directory, "state.json")
     private val pendingFile = File(directory, "pending.json")
@@ -102,7 +105,7 @@ internal class WebhookSyncEngine(
                     bytes = 0
                 }
                 for (i in 0 until events.length()) {
-                    val event = events.getJSONObject(i)
+                    val event = transform(events.getJSONObject(i))
                     require(event.has("id") && event.has("timestamp") && event.has("duration") && event.has("data")) {
                         "Local server returned an incomplete event"
                     }

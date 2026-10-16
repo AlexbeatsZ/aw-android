@@ -1,0 +1,79 @@
+name: Personal build
+
+# Builds the personal fork without the Rust toolchain: the Kotlin app is compiled
+# against the unchanged native backend from the matching upstream release
+# (see docs/build-via-webhook.md). Produces an arm64 debug APK as an artifact.
+on:
+  push:
+    branches: ['claude/**', 'feat/**', 'personal/**']
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  UPSTREAM_NATIVE_TAG: v0.14.3
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - uses: android-actions/setup-android@v3
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Fetch the matching upstream native backend
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/native"
+          gh release download "$UPSTREAM_NATIVE_TAG" --repo ActivityWatch/aw-android \
+            --pattern aw-android-arm64-v8a.apk --dir "$RUNNER_TEMP/native"
+          python3 scripts/prepare-upstream-native.py "$RUNNER_TEMP/native/aw-android-arm64-v8a.apk"
+
+      # Optional: sign with your own debug key so the APK updates the installed app
+      # in place. Store `base64 -w0 ~/.android/debug.keystore` as DEBUG_KEYSTORE_BASE64.
+      - name: Restore debug signing key
+        env:
+          DEBUG_KEYSTORE_BASE64: ${{ secrets.DEBUG_KEYSTORE_BASE64 }}
+        if: env.DEBUG_KEYSTORE_BASE64 != ''
+        run: |
+          mkdir -p ~/.android
+          echo "$DEBUG_KEYSTORE_BASE64" | base64 -d > ~/.android/debug.keystore
+
+      - name: Dashboard and receiver tests
+        run: node --test mobile/src/test/js/model.test.js integrations/rog-webhook/activitywatch.test.mjs integrations/rog-webhook/receiver.test.mjs
+
+      - name: Unit tests and debug APK
+        run: ./gradlew --no-daemon :mobile:testStandardDebugUnitTest :mobile:assembleStandardDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: aw-android-personal-debug
+          path: mobile/build/outputs/apk/standard/debug/*.apk
+          if-no-files-found: error
+
+      - name: Upload test reports
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: mobile/build/reports/tests/
+          if-no-files-found: ignore

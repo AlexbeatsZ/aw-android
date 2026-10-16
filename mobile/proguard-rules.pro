@@ -47,12 +47,11 @@
 }
 
 # ---------------------------------------------------------------------------
-# WebView bridge (aw-webui -> app)
+# WebView bridge (assets/dashboard -> app)
 # ---------------------------------------------------------------------------
-# aw-webui calls window.Android.beginExport/appendExport/finishExport/
-# downloadCSV/downloadJSON by name (WebAppInterface in fragments/WebUIFragment.kt,
-# bound via addJavascriptInterface(..., "Android")). The class itself may be
-# renamed; the annotated methods may not.
+# The bundled dashboard calls window.AWNative.request(...) by name
+# (dashboard/DashboardBridge.kt, bound via addJavascriptInterface(..., "AWNative")).
+# The class itself may be renamed; the annotated methods may not.
 -keepclassmembers class * {
     @android.webkit.JavascriptInterface <methods>;
 }
@@ -62,8 +61,8 @@
 # ---------------------------------------------------------------------------
 # WorkManager persists the worker class name as a string and reconstructs it
 # through the default WorkerFactory, i.e. by reflection on the
-# (Context, WorkerParameters) constructor. Covers EventParsingWorker,
-# NotifyWorker (Worker) and SyncWorker (CoroutineWorker).
+# (Context, WorkerParameters) constructor. Covers EventParsingWorker (Worker),
+# SyncWorker and WebhookSyncWorker (CoroutineWorker).
 -keep class * extends androidx.work.ListenableWorker {
     public <init>(android.content.Context, androidx.work.WorkerParameters);
 }
@@ -71,15 +70,9 @@
 # ---------------------------------------------------------------------------
 # Reflectively instantiated framework classes
 # ---------------------------------------------------------------------------
-# MainActivity.setFragment() does `fragmentClass?.newInstance()`, and the
-# FragmentManager re-creates fragments by class name after process death.
+# The FragmentManager re-creates fragments by class name after process death.
 -keep public class * extends androidx.fragment.app.Fragment {
     public <init>();
-}
-
-# ViewModelProvider instantiates ViewModels reflectively (TestFragment).
--keep class * extends androidx.lifecycle.ViewModel {
-    <init>();
 }
 
 # ---------------------------------------------------------------------------

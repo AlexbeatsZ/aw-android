@@ -11,6 +11,8 @@ Collect Android application, unlock and Via browser activity without root or dai
 - ROG receiver is C:/Users/Meta/Project/Scripts/JavaScript/webhooks, existing ObsidianWebhookReceiver task and Tailscale HTTPS ingress. Dataset is C:/Users/Meta/Project/Workspaces/work-review/data/activitywatch, sibling of data/hub. Independent runtime Bearer credential; no credentials in source or APK.
 - K70 live acceptance: ROG received 8,607 merged events (8,106 app sessions, 499 unlocks, two real Via fixture visits with 5s/7s duration). This device exposes no page title; title stays empty. Do not substitute emulator title acceptance for device evidence.
 - AI Decision's automatic reader has not been extended for this dataset. JSON/CSV export is available through the receiver integration.
+- 2026-10-16 personal UI: the upstream aw-webui WebView, drawer, widget, aw-notify alerts, sync/auth settings screens and welcome page are removed. MainActivity hosts dashboard/DashboardFragment, which loads the bundled dark dashboard (assets/dashboard: timeline, donut + hourly stats, privacy rules, settings) and talks to dashboard/DashboardBridge (window.AWNative). The Rust server still embeds aw-webui but nothing opens it.
+- Privacy rules (privacy/PrivacyRules.kt, stored by PrivacyStore) rename matching apps/domains/keywords to a label and optionally keep only URL hosts. They apply to the dashboard payload and, through WebhookSyncEngine's transform, to every webhook upload. A rule change re-sends the 7-day replay window; older raw batches on ROG are not rewritten.
 
 # Active Work
 
@@ -22,6 +24,9 @@ Collect Android application, unlock and Via browser activity without root or dai
 - Delivery branch: feat/via-browser-sync on the user fork.
 
 # Build / Run / Test
+
+- CI: .github/workflows/personal.yml builds the arm64 debug APK from upstream v0.14.3 native libraries on pushes to claude/**, feat/**, personal/**.
+- node --test mobile/src/test/js/model.test.js covers the dashboard's data shaping.
 
 - Read docs/build-via-webhook.md for matching upstream native library preparation and reproducible commands.
 - Existing per-process JDK 17: /opt/homebrew/opt/openjdk@17; SDK: /Users/meta/Library/Android/sdk.
@@ -36,6 +41,7 @@ Collect Android application, unlock and Via browser activity without root or dai
 - docs/design/via-and-personal-sync.md: browser extraction, retry/state contract, device evidence and Funnel networking. Read before modifying these modules.
 - integrations/rog-webhook/README.md: receiver deployment, storage and export protocol.
 - docs/build-via-webhook.md: native backend preparation, build and acceptance commands.
+- mobile/src/main/assets/dashboard: the whole UI (no build step; plain JS). Bridge methods: day, candidates, privacy.get/set, status, open, webhook.syncNow, ui.get/set.
 
 # Durable Lessons
 

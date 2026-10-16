@@ -10,7 +10,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Permissions"
+        android:text="权限"
         android:textSize="24sp"
         android:layout_gravity="center"
         android:layout_marginBottom="10dp"
@@ -20,7 +20,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="ActivityWatch requires the following permissions to work."
+        android:text="记录手机使用需要以下权限。只有第一项是必需的。"
         />
 
     <LinearLayout
@@ -36,7 +36,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Usage Access"
+        android:text="使用情况访问"
         android:textSize="16sp"/>
     <LinearLayout
         android:layout_width="match_parent"
@@ -61,7 +61,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="We need these permissions to track your app usage."
+                android:text="必需：记录应用使用时长和解锁次数。"
                 android:paddingTop="8dp"/>
         </LinearLayout>
 
@@ -69,7 +69,7 @@
             android:id="@+id/btnGrantUsagePermission"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Grant" />
+            android:text="授权" />
     </LinearLayout>
 
     <com.google.android.material.divider.MaterialDivider
@@ -81,7 +81,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Accessibility"
+        android:text="无障碍"
         android:textSize="16sp"/>
     <LinearLayout
         android:layout_width="match_parent"
@@ -105,7 +105,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="(optional) Allow tracking the page title and URL in supported browsers."
+                android:text="可选：记录浏览器（包括 Via）的网址和标题。"
                 android:paddingTop="8dp"/>
         </LinearLayout>
 
@@ -113,7 +113,7 @@
             android:id="@+id/btnGrantAccessibilityPermission"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Grant" />
+            android:text="授权" />
     </LinearLayout>
 
     <com.google.android.material.divider.MaterialDivider
@@ -125,7 +125,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Exact Alarms"
+        android:text="精确闹钟"
         android:textSize="16sp"/>
     <LinearLayout
         android:layout_width="match_parent"
@@ -151,7 +151,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="(optional) Allow frequent background updates for home screen widgets."
+                android:text="可选：让后台记录更准时。"
                 android:paddingTop="8dp"/>
         </LinearLayout>
 
@@ -159,7 +159,7 @@
             android:id="@+id/btnGrantExactAlarmPermission"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Grant" />
+            android:text="授权" />
     </LinearLayout>
 
     <com.google.android.material.divider.MaterialDivider
@@ -171,7 +171,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Notification Access"
+        android:text="通知使用权"
         android:textSize="16sp"/>
     <LinearLayout
         android:layout_width="match_parent"
@@ -197,7 +197,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="(optional) Allow tracking media playback (music, podcasts, videos)."
+                android:text="可选：记录媒体播放（音乐、播客、视频）。"
                 android:paddingTop="8dp"/>
         </LinearLayout>
 
@@ -205,7 +205,7 @@
             android:id="@+id/btnGrantNotificationPermission"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Grant" />
+            android:text="授权" />
     </LinearLayout>
     </LinearLayout>
 </LinearLayout>

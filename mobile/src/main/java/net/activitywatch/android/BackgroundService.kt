@@ -201,8 +201,9 @@ class BackgroundService : Service() {
         scheduleEventParsing()
         net.activitywatch.android.sync.WebhookSyncWorker.schedule(this)
 
-        // Schedule activity-time notifications (aw-notify)
-        scheduleNotifyChecks()
+        // Category-time alerts (aw-notify) were removed in the personal build; drop any
+        // periodic run an earlier version scheduled, since its worker class is gone.
+        androidx.work.WorkManager.getInstance(this).cancelUniqueWork("NotifyWorker")
 
         isFullyStarted = true
         // A sticky recreation can occur while the app is backgrounded, where Android 12+
@@ -285,22 +286,6 @@ class BackgroundService : Service() {
         }
         Log.w(TAG, "$name migration failed ($errorMsg); will retry on next start")
         return false
-    }
-
-    private fun scheduleNotifyChecks() {
-        val notifyRequest = androidx.work.PeriodicWorkRequest.Builder(
-            net.activitywatch.android.workers.NotifyWorker::class.java,
-            15, java.util.concurrent.TimeUnit.MINUTES
-        )
-            .addTag("NotifyWorker")
-            .build()
-
-        androidx.work.WorkManager.getInstance(this).enqueueUniquePeriodicWork(
-            "NotifyWorker",
-            androidx.work.ExistingPeriodicWorkPolicy.KEEP,
-            notifyRequest
-        )
-        Log.i(TAG, "Scheduled activity-time notification worker (every 15 minutes)")
     }
 
     private fun scheduleEventParsing() {

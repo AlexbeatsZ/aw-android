@@ -49,3 +49,4 @@ Collect Android application, unlock and Via browser activity without root or dai
 - The K70 VPN advertises an HTTP proxy as well as fake DNS. DNS override alone still went through CONNECT's failed resolver. Public-Funnel fallback must retain original-host TLS validation and bypass that advertised proxy for the fallback connection only; change no global VPN configuration.
 - A completed local export is not evidence of network receipt. Validate Android transmission, immutable remote storage and merged exports separately.
 - Windows PowerShell 5 redirection changes encoding; the export CLI's output-file argument writes UTF-8 directly.
+- In GitHub Actions, android-actions/setup-android@v3 defaults to installing the legacy 'tools' package, which fails on modern runner images; explicitly pass 'packages: platform-tools'.

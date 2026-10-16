@@ -49,6 +49,8 @@ class OnboardingActivity : AppCompatActivity() {
             backButton.visibility = if (viewPager.currentItem > 0) View.VISIBLE else View.GONE
         }
 
+        updateButtons()
+
         // If not users first time, skip to the last page
         val prefs = AWPreferences(this)
         if (!prefs.isFirstTime()) {

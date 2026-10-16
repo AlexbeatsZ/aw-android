@@ -48,6 +48,8 @@ internal class DashboardBridge(
 
     @JavascriptInterface
     fun request(id: String, method: String, arg: String) {
+        // The page can still call in while its fragment is being destroyed.
+        if (executor.isShutdown) return
         executor.execute {
             val reply = try {
                 val result = handle(method, if (arg.isBlank()) null else arg)

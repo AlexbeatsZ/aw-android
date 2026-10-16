@@ -4,12 +4,12 @@ Collect Android application, unlock and Via browser activity without root or dai
 
 # Current State
 
-- Upstream v0.14.3, commit 968319fe5469c0120cd1fc8544e844cedac60ae7; branch feat/via-browser-sync; fork https://github.com/AlexbeatsZ/aw-android.
+- Upstream v0.14.3; personal dashboard branch `claude/optimistic-rubin-fnidk0`, delivered APK source `921b533b2194511affc041ce9b34072923c83ca1`; fork https://github.com/AlexbeatsZ/aw-android. The earlier Via/sync baseline is `683d970`.
 - Added Via support for mark.via and mark.via.gp, separate webhook settings and automatic WorkManager delivery, a durable outbox with acknowledged retries, recent event correction detection, and the ROG receiver/exporter integration.
-- K70: Android 16 / HyperOS OS3.0.307.0.WNKCNXM. Installed and authorized for usage/browser capture and automatic sync. User enabled autostart. Phone UI released for other tasks after direct uploads succeeded.
-- Xiaomi Pad 6 Pro: Android 15 / HyperOS 3. Installed and configured with a separate device identity, usage/browser permissions, autostart and automatic sync. ROG received 361 merged records, including two real Via visits; JSON/CSV exports passed.
+- K70: Android 16 / HyperOS OS3.0.307.0.WNKCNXM. On 2026-10-16 at 20:19 Asia/Singapore, uninstalled the old app without retaining data, installed the personal dashboard APK, and cleared app data again at the user's request. First launch visibly reaches the permission onboarding page. Usage/browser permissions and sync configuration are reset and need setup again.
+- Xiaomi Pad 6 Pro: Android 15 / HyperOS 3. Clean-reinstalled and cleared app data with the same APK at 20:19 Asia/Singapore on 2026-10-16; first launch visibly reaches permission onboarding. Prior device identity/settings are discarded. Earlier ROG acceptance received 361 merged records, including two real Via visits; it describes the previous installation.
 - ROG receiver is C:/Users/Meta/Project/Scripts/JavaScript/webhooks, existing ObsidianWebhookReceiver task and Tailscale HTTPS ingress. Dataset is C:/Users/Meta/Project/Workspaces/work-review/data/activitywatch, sibling of data/hub. Independent runtime Bearer credential; no credentials in source or APK.
-- K70 live acceptance: ROG received 8,607 merged events (8,106 app sessions, 499 unlocks, two real Via fixture visits with 5s/7s duration). This device exposes no page title; title stays empty. Do not substitute emulator title acceptance for device evidence.
+- Previous-installation K70 acceptance: ROG received 8,607 merged events (8,106 app sessions, 499 unlocks, two real Via fixture visits with 5s/7s duration). This device exposes no page title; title stays empty. Do not substitute emulator title acceptance for device evidence.
 - AI Decision's automatic reader has not been extended for this dataset. JSON/CSV export is available through the receiver integration.
 - 2026-10-16 personal UI: the upstream aw-webui WebView, drawer, widget, aw-notify alerts, sync/auth settings screens and welcome page are removed. MainActivity hosts dashboard/DashboardFragment, which loads the bundled dark dashboard (assets/dashboard: timeline, donut + hourly stats, privacy rules, settings) and talks to dashboard/DashboardBridge (window.AWNative). The Rust server still embeds aw-webui but nothing opens it.
 - Privacy rules (privacy/PrivacyRules.kt, stored by PrivacyStore) rename matching apps/domains/keywords to a label and optionally keep only URL hosts. They apply to the dashboard payload and, through WebhookSyncEngine's transform, to every webhook upload. A rule change re-sends the 7-day replay window; older raw batches on ROG are not rewritten.
@@ -21,7 +21,9 @@ Collect Android application, unlock and Via browser activity without root or dai
 - [x] Install/configure K70 and verify direct transfer plus ROG JSON/CSV exports.
 - [x] Complete tablet autostart, Via and direct-transfer acceptance.
 - [x] Finish acceptance notes and checks.
-- Delivery branch: feat/via-browser-sync on the user fork.
+- Delivery branch: `claude/optimistic-rubin-fnidk0` on the user fork.
+- [x] 2026-10-16 clean reinstall on K70 and Pad from successful GitHub run `38898142033`, artifact `aw-android-personal-debug`, source `921b533`; package `net.activitywatch.android.debug`, version 0.14.3/code 48, arm64. Both uninstall/install and post-install clear returned Success; actual first-launch screens verified and no AndroidRuntime crash was reported.
+- [ ] Configure permissions and sync again if requested; the fresh installs have not passed collection/upload acceptance. Existing ROG receiver records were not changed.
 
 # Build / Run / Test
 
@@ -34,7 +36,7 @@ Collect Android application, unlock and Via browser activity without root or dai
 - node --test integrations/rog-webhook/activitywatch.test.mjs integrations/rog-webhook/receiver.test.mjs: nine tests pass, including existing UpTimer behavior; also passed Windows staging before deployment.
 - ViaBrowserAcceptanceTest passes on isolated API36 emulator using the real native datastore. Only run there; preserve existing accessibility services.
 - Lint has six verified errors inherited from upstream (four API-version exception diagnostics and two widget tint attributes); this change adds none.
-- Temporary files: /tmp/.agents/ locally, Windows %LOCALAPPDATA%/Temp/.agents/. Package is net.activitywatch.android.debug; preserve the signing key and app data for updates.
+- Temporary files: /tmp/.agents/ locally, Windows %LOCALAPPDATA%/Temp/.agents/. Package is net.activitywatch.android.debug. Normal updates should preserve signing key/data; the 2026-10-16 reinstall explicitly discarded local data. The downloaded CI APK uses its generated debug key.
 
 # Design Index
 

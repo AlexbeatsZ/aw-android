@@ -1,4 +1,13 @@
 <resources>
+    <string name="webhook_sync">Webhook sync</string>
+    <string name="webhook_description">Send app usage, unlocks and browser visits to your own receiver. Automatic sync runs about every 15 minutes when connected; Android may delay background work. Failed deliveries are retried. Your receiver must support the ActivityWatch webhook format.</string>
+    <string name="webhook_enable">Enable automatic webhook sync</string>
+    <string name="webhook_url_hint">https://your-device.ts.net/activitywatch</string>
+    <string name="webhook_token_hint">Receiver token</string>
+    <string name="webhook_token_required">Enter a receiver token of at least 32 characters</string>
+    <string name="webhook_save">Save and sync now</string>
+    <string name="webhook_saved">Webhook settings saved</string>
+    <string name="via_tracking_setup">For Via, choose Settings → General → Toolbars settings → URL field content → URL. Title-only display does not expose the webpage address.</string>
     <string name="app_name">ActivityWatch</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
@@ -30,7 +39,7 @@
          must be shown and affirmatively accepted BEFORE directing the user to
          enable the accessibility service. -->
     <string name="accessibility_disclosure_title">Web browsing tracking</string>
-    <string name="accessibility_disclosure_message">To track your web browsing activity, ActivityWatch uses Android\'s Accessibility API to read the URL and page title from your browser while you browse.\n\nThis data is processed and stored only on your device. It is never sent to the ActivityWatch developers or any third party.\n\nIf you agree, enable ActivityWatch under Accessibility settings on the next screen. This is optional — the rest of the app works without it.</string>
+    <string name="accessibility_disclosure_message">To track your web browsing activity, ActivityWatch uses Android\'s Accessibility API to read the URL and page title from your browser while you browse.\n\nThis data is stored on your device. If you enable synchronization, it is also sent to the destination you configure. It is never sent to the ActivityWatch developers.\n\nIf you agree, enable ActivityWatch under Accessibility settings on the next screen. This is optional — the rest of the app works without it.</string>
     <string name="accessibility_disclosure_agree">Agree</string>
     <string name="accessibility_disclosure_decline">No thanks</string>
 

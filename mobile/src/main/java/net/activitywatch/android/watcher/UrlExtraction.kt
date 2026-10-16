@@ -24,3 +24,16 @@ internal val stripProtocol: (String) -> String = { url ->
 // momentarily-cleared address bar) is treated as "no url", not as a real value.
 internal fun processExtractedText(rawText: String?): String? =
     rawText?.takeIf { it.isNotBlank() }
+
+/** Via's toolbar may display a page title, domain or full URL. Never turn a title
+ * or a partially typed address into a visit. The Via setting must display URL. */
+internal fun parseViaAddressBar(text: String?, editable: Boolean = false): String? {
+    if (editable) return null
+    val candidate = text?.trim()?.takeIf { it.isNotEmpty() && it.none(Char::isWhitespace) } ?: return null
+    val withScheme = if (candidate.startsWith("https://") || candidate.startsWith("http://")) candidate
+        else "https://$candidate"
+    val uri = try { java.net.URI(withScheme) } catch (_: Exception) { return null }
+    val host = uri.host ?: return null
+    if (uri.userInfo != null || (!host.contains('.') && host != "localhost")) return null
+    return stripProtocol(candidate)
+}

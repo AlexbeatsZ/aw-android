@@ -1,6 +1,11 @@
 package net.activitywatch.android.watcher
 
 import android.accessibilityservice.AccessibilityService
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import androidx.core.content.ContextCompat
 import android.util.Log
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.ThreadPoolExecutor
@@ -41,6 +46,66 @@ class WebWatcher : AccessibilityService() {
         }
     }
 
+    private fun extractViaUrl(packageName: String): String? {
+        val root = rootInActiveWindow ?: return null
+        try {
+            if (root.packageName?.toString() != packageName) return null
+            // Captured from the installed Via Play APK's actual toolbar. Via creates
+            // its address label programmatically, so the label itself has no view id.
+            // The enclosing toolbar does. Searching only that toolbar excludes all
+            // web page links, history rows and address-entry suggestions.
+            val toolbar = findNode(root) { it.viewIdResourceName == "$packageName:id/fm" }
+            if (toolbar == null) {
+                // AccessibilityService can receive a compressed tree that omits the
+                // toolbar container/id even though UiAutomator's tree includes it.
+                // A committed Via address is a clickable native TextView flanked by
+                // native ImageViews. Require a page WebView and reject page/list ancestry.
+                val webView = findNode(root) { it.className == "android.webkit.WebView" } ?: return null
+                if (webView !== root) webView.recycle()
+                val address = findNode(root) { node ->
+                    node.className == "android.widget.TextView" && node.isClickable && !node.isEditable &&
+                        parseViaAddressBar(node.text?.toString()) != null && isViaToolbarLabel(node)
+                } ?: return null
+                try { return parseViaAddressBar(address.text?.toString()) }
+                finally { if (address !== root) address.recycle() }
+            }
+            try {
+                val address = findNode(toolbar) {
+                    it.className == "android.widget.TextView" && it.isClickable && !it.isEditable
+                } ?: return null
+                try { return parseViaAddressBar(address.text?.toString(), address.isEditable) }
+                finally { if (address !== toolbar) address.recycle() }
+            } finally { if (toolbar !== root) toolbar.recycle() }
+        } finally { root.recycle() }
+    }
+
+    private fun isViaToolbarLabel(node: AccessibilityNodeInfo): Boolean {
+        val parent = node.parent ?: return false
+        var icons = 0
+        try {
+            if (parent.childCount > 16) return false
+            for (i in 0 until parent.childCount) {
+                val sibling = parent.getChild(i) ?: continue
+                try { if (sibling.className == "android.widget.ImageView") icons++ }
+                finally { sibling.recycle() }
+            }
+        } finally { parent.recycle() }
+        if (icons < 2) return false
+        var ancestor = node.parent
+        var depth = 0
+        while (ancestor != null && depth++ < MAX_TRAVERSAL_DEPTH) {
+            val current = ancestor
+            try {
+                val name = current.className?.toString().orEmpty()
+                if (name == "android.webkit.WebView" || name.contains("RecyclerView") ||
+                    name.contains("ListView") || name.contains("ScrollView")) return false
+                ancestor = current.parent
+            } finally { current.recycle() }
+        }
+        ancestor?.recycle()
+        return ancestor == null
+    }
+
     private val TAG = "WebWatcher"
     private val bucket_id = "aw-watcher-android-web"
     private val lastDiagnosticDump = mutableMapOf<String, Long>()
@@ -48,6 +113,11 @@ class WebWatcher : AccessibilityService() {
     @Volatile private var ri : RustInterface? = null
     private var lastWindowId: Int? = null
     private val sessionTracker = BrowserSessionTracker()
+    private val screenOffReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            if (intent?.action == Intent.ACTION_SCREEN_OFF) handleUrl(null, newBrowser = null)
+        }
+    }
 
     // heartbeat() blocks on the datastore worker for as long as it is busy. Calling it from
     // onAccessibilityEvent ran it on the service's main thread, the same pattern that caused
@@ -80,12 +150,15 @@ class WebWatcher : AccessibilityService() {
             extractTextByViewId(event, "com.opera.browser:id/url_field")
                 ?: extractTextByViewId(event, "com.opera.browser:id/address_field")
         "com.microsoft.emmx" -> extractTextByViewId(event, "com.microsoft.emmx:id/url_bar")
+        "mark.via", "mark.via.gp" -> extractViaUrl(packageName)
         else -> null
     }?.let(stripProtocol)
 
     override fun onCreate() {
         super.onCreate()
         Log.i(TAG, "Creating WebWatcher")
+        ContextCompat.registerReceiver(this, screenOffReceiver, IntentFilter(Intent.ACTION_SCREEN_OFF),
+            ContextCompat.RECEIVER_NOT_EXPORTED)
         // createBucketHelper() blocks on the datastore worker. Doing that on the
         // accessibility service's main thread produced "Executing service
         // WebWatcher" ANRs whenever the worker was busy (aw-android#261), so
@@ -132,6 +205,11 @@ class WebWatcher : AccessibilityService() {
                     val newUrl = extractUrl(browser, event)
 
                     if (newUrl == null) {
+                        if (browser == "mark.via" || browser == "mark.via.gp") {
+                            // Home, address editing or title-only toolbar: don't let the
+                            // previous known visit keep growing through an unknown page.
+                            handleUrl(null, newBrowser = null)
+                        }
                         maybeDumpTree(browser)
                     } else {
                         handleUrl(newUrl, newBrowser = browser)
@@ -223,6 +301,8 @@ class WebWatcher : AccessibilityService() {
     override fun onInterrupt() {}
 
     override fun onDestroy() {
+        unregisterReceiver(screenOffReceiver)
+        handleUrl(null, newBrowser = null)
         // Lets already-queued events finish writing.
         writer.shutdown()
         super.onDestroy()
@@ -237,7 +317,9 @@ class WebWatcher : AccessibilityService() {
             "org.mozilla.firefox",
             "com.sec.android.app.sbrowser",
             "com.opera.browser",
-            "com.microsoft.emmx"
+            "com.microsoft.emmx",
+            "mark.via",
+            "mark.via.gp"
         )
     }
 }

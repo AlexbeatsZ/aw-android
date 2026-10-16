@@ -199,6 +199,7 @@ class BackgroundService : Service() {
 
         // Schedule event parsing
         scheduleEventParsing()
+        net.activitywatch.android.sync.WebhookSyncWorker.schedule(this)
 
         // Schedule activity-time notifications (aw-notify)
         scheduleNotifyChecks()

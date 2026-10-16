@@ -184,6 +184,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         usw.setupAlarm()
 
         binding.navView.setNavigationItemSelectedListener(this)
+        binding.nativeMenu.setOnClickListener { binding.drawerLayout.openDrawer(GravityCompat.START) }
 
         // Ensure API key exists in config before the server starts so it picks it up at init.
         dashboardApiKey = ensureDashboardApiKey(this)
@@ -367,6 +368,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             }
             R.id.nav_sync_settings -> {
                 startActivity(Intent(this, SyncSettingsActivity::class.java))
+            }
+            R.id.nav_webhook_settings -> {
+                startActivity(Intent(this, net.activitywatch.android.sync.WebhookSettingsActivity::class.java))
             }
             R.id.nav_share -> {
                 openDashboardInBrowser()

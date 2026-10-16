@@ -5,6 +5,17 @@ import org.junit.Assert.assertNull
 import org.junit.Test
 
 class UrlExtractionTest {
+    @Test
+    fun `Via accepts committed URLs but rejects titles home pages and typed addresses`() {
+        assertEquals("example.com/path?q=1", parseViaAddressBar("https://example.com/path?q=1"))
+        assertEquals("example.com/path", parseViaAddressBar("example.com/path"))
+        assertNull(parseViaAddressBar("Example Domain"))
+        assertNull(parseViaAddressBar("Search or enter address"))
+        assertNull(parseViaAddressBar("about:blank"))
+        assertNull(parseViaAddressBar("file:///sdcard/home.html"))
+        assertNull(parseViaAddressBar("https://example.com", editable = true))
+        assertNull(parseViaAddressBar(""))
+    }
 
     @Test
     fun `extracts url from typical content description`() {

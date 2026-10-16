@@ -64,6 +64,8 @@
             android:configChanges="orientation"
             android:theme="@style/AppTheme.LightOnly"
             android:exported="false"/>
+        <activity android:name=".sync.WebhookSettingsActivity"
+            android:theme="@style/AppTheme.LightOnly" android:exported="false" />
 
         <receiver
             android:name=".watcher.AlarmReceiver"

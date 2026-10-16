@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="webhook_sync">Webhook 同步</string>
+    <string name="webhook_description">把应用使用、解锁和网页访问记录发送到自己的接收服务。联网后约每 15 分钟自动同步，系统省电策略可能延迟执行。发送失败会重试。</string>
+    <string name="webhook_enable">启用自动 Webhook 同步</string>
+    <string name="webhook_url_hint">https://your-device.ts.net/activitywatch</string>
+    <string name="webhook_token_hint">接收端密钥</string>
+    <string name="webhook_token_required">请输入至少 32 个字符的接收端密钥</string>
+    <string name="webhook_save">保存并立即同步</string>
+    <string name="webhook_saved">同步设置已保存</string>
+    <string name="via_tracking_setup">Via 需要在“设置 → 常规 → 工具栏设置 → 地址栏内容”中选择“网址”。只显示标题时，无法读取网页地址。</string>
+    <string name="app_name">ActivityWatch</string>
+    <string name="navigation_drawer_open">打开应用菜单</string>
+    <string name="navigation_drawer_close">关闭应用菜单</string>
+    <string name="nav_header_title">ActivityWatch Android 版</string>
+    <string name="nav_header_subtitle">v0.1.0</string>
+    <string name="nav_header_desc">导航菜单</string>
+    <string name="action_settings">设置</string>
+    <string name="dashboard_settings">仪表盘设置</string>
+    <string name="api_authentication">API 身份验证</string>
+    <string name="sync_settings">目录同步设置</string>
+    <string name="open_in_browser">在浏览器中打开</string>
+    <string name="importing_usage_history">正在导入使用记录…完成前仪表盘的数据可能不完整。</string>
+    <string name="title_activity_buckets">数据桶</string>
+    <string name="welcome_title_text">欢迎使用 ActivityWatch！</string>
+    <string name="welcome_text">感谢使用 ActivityWatch Android 版！\n\n在应用菜单中选择“Activity”查看活动记录，或选择同步设置把记录传到自己的设备。\n\n帮助文档：https://docs.activitywatch.net/</string>
+    <string name="button_log_text">采集数据</string>
+    <string name="accessibility_service_description">允许 ActivityWatch 读取浏览器的网址和网页标题。</string>
+    <string name="accessibility_disclosure_title">网页访问采集</string>
+    <string name="accessibility_disclosure_message">ActivityWatch 使用 Android 无障碍接口读取浏览时的网址和网页标题。\n\n数据保存在本机。启用同步后，数据还会发送到你配置的目标，不会发送给 ActivityWatch 开发者。\n\n同意后可在下一页启用 ActivityWatch 无障碍服务。网页采集是可选功能，其他采集功能仍可单独使用。</string>
+    <string name="accessibility_disclosure_agree">同意</string>
+    <string name="accessibility_disclosure_decline">暂不启用</string>
+    <string name="hello_blank_fragment">空白页面</string>
+    <string name="widget_category_time_description">显示今日屏幕使用时间和主要分类</string>
+    <string name="no_browser_found">没有可打开此网址的浏览器</string>
+    <string name="export_saved">已保存 %1$s</string>
+    <string name="export_save_failed">无法保存导出文件</string>
+</resources>

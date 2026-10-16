@@ -33,6 +33,8 @@
                         android:id="@+id/nav_sync_settings"
                         android:icon="@drawable/ic_menu_manage"
                         android:title="@string/sync_settings"/>
+                <item android:id="@+id/nav_webhook_settings"
+                    android:icon="@drawable/ic_menu_send" android:title="@string/webhook_sync" />
                 <item
                         android:id="@+id/nav_share"
                         android:icon="@drawable/ic_menu_share"

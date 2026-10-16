@@ -31,4 +31,15 @@
 
     </androidx.drawerlayout.widget.DrawerLayout>
 
+    <!-- The upstream WebUI has its own menu. Give native settings an explicit
+         entry point on phones whose system back gesture consumes drawer swipes. -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/native_menu"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|start"
+            android:layout_margin="16dp"
+            android:contentDescription="@string/navigation_drawer_open"
+            app:srcCompat="@drawable/ic_menu_manage" />
+
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

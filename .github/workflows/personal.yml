@@ -38,6 +38,16 @@ jobs:
         with:
           packages: platform-tools
 
+      # Gradle refuses to configure :mobile without the NDK that build.gradle pins
+      # (the rust-android plugin resolves it), even though the native libraries
+      # are prebuilt. Read the version from build.gradle so the two cannot drift.
+      - name: Install the pinned NDK
+        run: |
+          NDK_VERSION=$(sed -n 's/^[[:space:]]*ndkVersion "\(.*\)"/\1/p' mobile/build.gradle)
+          test -n "$NDK_VERSION"
+          echo "Installing NDK $NDK_VERSION"
+          sdkmanager --install "ndk;$NDK_VERSION" > /dev/null
+
       - uses: gradle/actions/setup-gradle@v4
 
       - name: Fetch the matching upstream native backend
